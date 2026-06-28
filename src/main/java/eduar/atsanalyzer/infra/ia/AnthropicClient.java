@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eduar.atsanalyzer.exceptions.AnaliseException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
@@ -14,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class AnthropicClient {
@@ -50,6 +52,7 @@ public class AnthropicClient {
             return root.get("content").get(0).get("text").asText();
 
         } catch (Exception e) {
+            log.error("falha no comunicação com a API da Anthropic: {}", e.getMessage(), e);
             throw new AnaliseException("Erro na comunicação com a API da Anthropic", e);
         }
     }
