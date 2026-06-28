@@ -2,6 +2,7 @@ package eduar.atsanalyzer.infra.ia;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import eduar.atsanalyzer.exceptions.AnaliseException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
@@ -49,7 +50,7 @@ public class AnthropicClient {
             return root.get("content").get(0).get("text").asText();
 
         } catch (Exception e) {
-            throw new RuntimeException("Erro na comunicação com a API da Anthropic", e);
+            throw new AnaliseException("Erro na comunicação com a API da Anthropic", e);
         }
     }
 }
