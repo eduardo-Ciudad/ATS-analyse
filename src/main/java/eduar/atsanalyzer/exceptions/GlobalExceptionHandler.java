@@ -33,4 +33,10 @@ public class GlobalExceptionHandler {
                 .body(Map.of("erro", "Erro interno inesperado"));
     }
 
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Map<String, String>> handlerGeneric(Exception e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("Erro", "Erro interno inesperado"));
+    }
+
 }
