@@ -1,5 +1,6 @@
 package eduar.atsanalyzer.exceptions;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -8,6 +9,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.Map;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
     @ExceptionHandler(PdfProcessingException.class)
@@ -18,6 +20,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(AnaliseException.class)
     public ResponseEntity<Map<String, String>> handleAnalise(AnaliseException e) {
+        log.error("Erro na analise: {}", e.getMessage(), e);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(Map.of("erro", e.getMessage()));
     }
@@ -35,6 +38,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, String>> handlerGeneric(Exception e) {
+        log.error("Erro inesperado: {}", e.getMessage(), e);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(Map.of("Erro", "Erro interno inesperado"));
     }
