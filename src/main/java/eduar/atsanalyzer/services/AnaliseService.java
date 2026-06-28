@@ -58,6 +58,9 @@ public class AnaliseService {
 
                 String chave = node.get("chave").asText();
                 CategoriaAnalise categoria = CATEGORIA_MAP.get(chave);
+
+                if (categoria == null) continue;
+
                 int score = node.get("score").asInt();
 
                 categorias.add(new CategoriaResponse(
