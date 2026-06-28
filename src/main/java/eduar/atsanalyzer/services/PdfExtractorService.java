@@ -1,5 +1,6 @@
 package eduar.atsanalyzer.services;
 
+import eduar.atsanalyzer.exceptions.PdfProcessingException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -14,13 +15,13 @@ public class PdfExtractorService {
             String texto = stripper.getText(document);
 
             if (texto.isBlank()) {
-                throw new RuntimeException("O PDF não contém texto extraível");
+                throw new PdfProcessingException("O PDF não contém texto extraível");
             }
 
             return texto;
 
         } catch (IOException e) {
-            throw new RuntimeException("Erro ao processar o arquivo PDF", e);
+            throw new PdfProcessingException("Erro ao processar o arquivo PDF", e);
         }
     }
 }
