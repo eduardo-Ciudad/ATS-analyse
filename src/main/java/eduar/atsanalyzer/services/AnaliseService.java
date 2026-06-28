@@ -55,6 +55,7 @@ public class AnaliseService {
 
             List<CategoriaResponse> categorias = new ArrayList<>();
             for (JsonNode node : root.get("categorias")) {
+
                 String chave = node.get("chave").asText();
                 CategoriaAnalise categoria = CATEGORIA_MAP.get(chave);
                 int score = node.get("score").asInt();
