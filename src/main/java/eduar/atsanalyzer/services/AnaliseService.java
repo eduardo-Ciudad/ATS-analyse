@@ -1,6 +1,8 @@
 package eduar.atsanalyzer.services;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eduar.atsanalyzer.domain.CategoriaAnalise;
@@ -8,6 +10,7 @@ import eduar.atsanalyzer.domain.StatusAderencia;
 import eduar.atsanalyzer.dtos.request.AnaliseRequest;
 import eduar.atsanalyzer.dtos.response.AnaliseResponse;
 import eduar.atsanalyzer.dtos.response.CategoriaResponse;
+import eduar.atsanalyzer.exceptions.AnaliseException;
 import eduar.atsanalyzer.infra.ia.AnthropicClient;
 import eduar.atsanalyzer.infra.ia.PromptBuilder;
 import lombok.RequiredArgsConstructor;
@@ -72,8 +75,9 @@ public class AnaliseService {
 
             return new AnaliseResponse(scoreGeral, statusGeral, categorias, sugestoes);
 
-        } catch (Exception e) {
-            throw new RuntimeException("Erro ao processar resposta da IA", e);
+        } catch (JsonProcessingException e) {
+            throw new AnaliseException("Erro ao processar resposta da IA", e);
+
         }
     }
 }
