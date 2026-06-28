@@ -8,6 +8,8 @@ import eduar.atsanalyzer.domain.StatusAderencia;
 import eduar.atsanalyzer.dtos.request.AnaliseRequest;
 import eduar.atsanalyzer.dtos.response.AnaliseResponse;
 import eduar.atsanalyzer.dtos.response.CategoriaResponse;
+import eduar.atsanalyzer.infra.ia.AnthropicClient;
+import eduar.atsanalyzer.infra.ia.PromptBuilder;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -37,6 +39,8 @@ public class AnaliseService {
         String textoCurriculo = pdfExtractorService.extrairTexto(curriculo);
         String prompt = promptBuilder.build(textoCurriculo, analiseRequest.descricaoVaga());
         String respostaJson = anthropicClient.enviar(prompt);
+
+        return parsearResposta(respostaJson);
     }
 
     private AnaliseResponse parsearResposta(String json) {
