@@ -10,6 +10,15 @@ import java.io.IOException;
 @Service
 public class PdfExtractorService {
     public String extrairTexto(MultipartFile file) {
+
+        if(file.isEmpty()) {
+            throw new PdfProcessingException("O arquivo enviado esta vazio");
+        }
+        String filename = file.getOriginalFilename();
+        if(filename == null || !filename.toLowerCase().endsWith(".pdf")) {
+            throw new PdfProcessingException("apenas arquivos PDF sao aceitos");
+        }
+
         try (PDDocument document = PDDocument.load(file.getInputStream())) {
             PDFTextStripper stripper = new PDFTextStripper();
             String texto = stripper.getText(document);
