@@ -1,4 +1,4 @@
-package eduar.atsanalyzer.infra.security;
+package eduar.atsanalyzer.infra.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
