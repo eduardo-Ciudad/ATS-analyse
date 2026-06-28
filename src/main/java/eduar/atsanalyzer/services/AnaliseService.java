@@ -38,9 +38,9 @@ public class AnaliseService {
             "formatacao", CategoriaAnalise.FORMATACAO
     );
 
-    public AnaliseResponse analisar(MultipartFile curriculo, AnaliseRequest analiseRequest){
+    public AnaliseResponse analisar(MultipartFile curriculo, String descricaoVaga) {
         String textoCurriculo = pdfExtractorService.extrairTexto(curriculo);
-        String prompt = promptBuilder.build(textoCurriculo, analiseRequest.descricaoVaga());
+        String prompt = promptBuilder.build(textoCurriculo, descricaoVaga);
         String respostaJson = anthropicClient.enviar(prompt);
 
         return parsearResposta(respostaJson);
