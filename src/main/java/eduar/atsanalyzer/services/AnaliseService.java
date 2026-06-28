@@ -14,6 +14,7 @@ import eduar.atsanalyzer.exceptions.AnaliseException;
 import eduar.atsanalyzer.infra.ia.AnthropicClient;
 import eduar.atsanalyzer.infra.ia.PromptBuilder;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -22,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AnaliseService {
@@ -39,11 +41,20 @@ public class AnaliseService {
     );
 
     public AnaliseResponse analisar(MultipartFile curriculo, String descricaoVaga) {
+        log.info("Iniciando análise - arquivo: {}, tamanho: {} bytes", curriculo.getOriginalFilename(), curriculo.getSize());
         String textoCurriculo = pdfExtractorService.extrairTexto(curriculo);
         String prompt = promptBuilder.build(textoCurriculo, descricaoVaga);
-        String respostaJson = anthropicClient.enviar(prompt);
 
-        return parsearResposta(respostaJson);
+        long inicio = System.currentTimeMillis();
+        String respostaJson = anthropicClient.enviar(prompt);
+        long latencia = System.currentTimeMillis();
+
+        log.info("resposta da Anthropic recebida em {}ms", latencia);
+
+        AnaliseResponse response = parsearResposta(respostaJson);
+        log.info("Análise concluida - score: {}, status: {}", response.scoreGeral(), response.statusGeral());
+
+        return response;
     }
 
     private AnaliseResponse parsearResposta(String json) {
