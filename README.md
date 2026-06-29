@@ -13,6 +13,9 @@ API REST que analisa currículos contra descrições de vagas usando métricas d
 - **IA:** Anthropic Claude API (claude-sonnet-4-6)
 - **Documentação:** SpringDoc OpenAPI (Swagger)
 - **Rate Limiting:** Bucket4j
+- **Testes:** JUnit 5, Mockito, MockMvc
+- **CI/CD:** GitHub Actions
+- **Containerização:** Docker (multi-stage build)
 - **Frontend:** HTML, CSS, JavaScript (glassmorphism design)
 
 ## Arquitetura
@@ -131,6 +134,58 @@ Content-Type: multipart/form-data
 | `429` | Rate limit excedido (10 req/min por IP) |
 | `500` | Falha na comunicação com a IA ou parsing da resposta |
 
+## Testes
+
+Suíte com ~25 testes unitários cobrindo todas as camadas da aplicação.
+
+| Classe de teste | O que cobre |
+|---|---|
+| `StatusAderenciaTest` | Boundary testing nas fronteiras 75/74/50/49 |
+| `PromptBuilderTest` | Formatação do prompt — seções, categorias, inserção de texto |
+| `PdfExtractorServiceTest` | Validação de input (vazio, não-PDF, null) + extração com PDFs gerados em memória |
+| `AnthropicClientTest` | Mock do RestTemplate — happy path, falhas de rede, body null |
+| `AnaliseServiceTest` | Orquestração completa, parsing de JSON, chave desconhecida ignorada |
+| `RateLimitFilterTest` | Rate limiting por IP, isolamento de buckets, bloqueio na 11ª requisição |
+
+```bash
+mvn test
+```
+
+## CI/CD
+
+Pipeline automatizado com GitHub Actions. A cada push na `main` ou abertura de PR:
+
+1. Checkout do código
+2. Setup do Java 17 (Temurin) com cache de dependências Maven
+3. Execução dos testes (`mvn test`)
+4. Build do JAR (`mvn package`)
+
+O pipeline não precisa de banco de dados — a aplicação é stateless e todos os testes usam mocks.
+
+## Docker
+
+Containerização com multi-stage build para imagem otimizada.
+
+### Build da imagem
+
+```bash
+docker build -t atsready .
+```
+
+### Executar o container
+
+```bash
+docker run -p 8080:8080 \
+  -e ANTHROPIC_API_KEY=sua-chave-aqui \
+  -e ANTHROPIC_API_MODEL=claude-haiku-4-5-20241022 \
+  atsready
+```
+
+### Dockerfile (multi-stage)
+
+- **Estágio 1 (build):** `maven:3.9.6-eclipse-temurin-17` — resolve dependências e empacota o JAR
+- **Estágio 2 (runtime):** `eclipse-temurin:17-jre-jammy` — apenas JRE, sem Maven/JDK, imagem final ~200MB
+
 ## Como rodar
 
 ### Pré-requisitos
@@ -150,14 +205,21 @@ spring.servlet.multipart.max-file-size=5MB
 spring.servlet.multipart.max-request-size=5MB
 ```
 
-### Execução
+### Execução local
 
 ```bash
 export ANTHROPIC_API_KEY=sua-chave-aqui
 ./mvnw spring-boot:run
 ```
 
-A API estará disponível em `http://localhost:8080`.  
+### Execução com Docker
+
+```bash
+docker build -t atsready .
+docker run -p 8080:8080 -e ANTHROPIC_API_KEY=sua-chave-aqui -e ANTHROPIC_API_MODEL=claude-haiku-4-5-20241022 atsready
+```
+
+A API estará disponível em `http://localhost:8080`.
 Swagger UI em `http://localhost:8080/swagger-ui.html`.
 
 ## Decisões técnicas
@@ -169,6 +231,8 @@ Swagger UI em `http://localhost:8080/swagger-ui.html`.
 - **`PromptBuilder` como componente:** prompt engineering é uma preocupação volátil e independente da orquestração
 - **`RestTemplate` (não WebClient):** fluxo síncrono por natureza, sem benefício em reatividade
 - **`CorsFilter` como Bean:** atua no nível de servlet, mais previsível para preflight e compatível com Spring Security
+- **Multi-stage Docker build:** estágio de build com Maven + JDK, estágio de runtime só com JRE — reduz tamanho da imagem final
+- **Testes com PDFs gerados em memória:** sem dependência de arquivos externos, controle total do conteúdo via PDFBox
 
 ## Autor
 
